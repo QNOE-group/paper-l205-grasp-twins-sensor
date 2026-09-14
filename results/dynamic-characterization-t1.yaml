@@ -1,0 +1,5 @@
+gases:
+- isopropanol
+- ethanol
+spectral_resolution: 20.0
+time_per_spectrum: 64.32694802917199

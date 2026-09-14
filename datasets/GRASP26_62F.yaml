@@ -1,0 +1,179 @@
+database:
+  local:
+  - .
+  - local-tmp.db
+  remote:
+  - Z:/
+  - NOE
+  - Projects
+  - GRASP
+  - Database
+  - Tests.db
+experiment:
+  experiment_name: MFC-TWINS
+  sample_name: MCT14
+instruments:
+  lockin:
+    args:
+    - lockin
+    - GPIB1::11::INSTR
+    class: SR810
+    kwargs: {}
+    parameters:
+      amplitude: 2
+      filter_slope: 6
+      frequency: 773
+      reserve: normal
+      sensitivity: 0.1
+      time_constant: 0.03
+  mfc_0:
+    args:
+    - mfc_0
+    - COM25
+    - '03'
+    class: F201CV
+    kwargs: {}
+    parameters:
+      capacity: 700
+  mfc_1:
+    args:
+    - mfc_1
+    - COM26
+    - '03'
+    class: F201CV
+    kwargs: {}
+    parameters:
+      capacity: 175
+  mfc_2:
+    args:
+    - mfc_2
+    - COM19
+    - '03'
+    class: F201CV
+    kwargs: {}
+    parameters:
+      capacity: 175
+  pid_1:
+    args:
+    - pid_1
+    - COM34
+    class: MiniPID2
+    kwargs:
+      gas: isopropanol
+      model: ppm
+    parameters: null
+  pid_2:
+    args:
+    - pid_2
+    - COM33
+    class: MiniPID2
+    kwargs:
+      gas: ethanol
+      model: ppm
+    parameters: null
+  twins:
+    args:
+    - twins
+    class: SmaractSCU
+    kwargs: {}
+    parameters: null
+measurement:
+  measurement_name: Test
+measurement_sequence:
+  mfc_0:
+  - 500
+  - 495
+  - 500
+  - 495
+  - 500
+  - 490
+  - 500
+  - 490
+  - 500
+  - 480
+  - 500
+  - 480
+  - 500
+  - 450
+  - 500
+  - 450
+  - 500
+  - 400
+  - 500
+  - 400
+  - 500
+  mfc_1:
+  - 0
+  - 5
+  - 0
+  - 0
+  - 0
+  - 10
+  - 0
+  - 0
+  - 0
+  - 20
+  - 0
+  - 0
+  - 0
+  - 50
+  - 0
+  - 0
+  - 0
+  - 100
+  - 0
+  - 0
+  - 0
+  mfc_2:
+  - 0
+  - 0
+  - 0
+  - 5
+  - 0
+  - 0
+  - 0
+  - 10
+  - 0
+  - 0
+  - 0
+  - 20
+  - 0
+  - 0
+  - 0
+  - 50
+  - 0
+  - 0
+  - 0
+  - 100
+  - 0
+  number_cycles:
+  - 10
+  - 10
+  - 10
+  - 10
+  - 10
+  - 10
+  - 10
+  - 10
+  - 10
+  - 10
+  - 10
+  - 10
+  - 10
+  - 10
+  - 10
+  - 10
+  - 10
+  - 10
+  - 10
+  - 10
+  - 10
+  pre_flush: 30
+  split_ratio: 0.5
+sampling:
+  bandlimited: false
+  spatial_oversampling: 1
+  spectral_range:
+  - 550
+  - 2500
+  spectral_resolution: 20
