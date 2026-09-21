@@ -88,7 +88,7 @@ predictor_type = "absorbance"  # "absorbance" or "neg-log-spectrum"
 
 concentration_bin_width = 10  # None or (ppm) - good: 10
 
-synthetic_sample_ratio = 1 / 5  # 1 / 5  # good: 1/5
+synthetic_sample_ratio = 1 / 5  # good: 1/5
 
 number_folds = 5
 
