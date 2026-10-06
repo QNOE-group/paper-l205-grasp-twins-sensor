@@ -1,13 +1,13 @@
 # TWINS Gas Sensing — Analysis Scripts
 
-Code for the manuscript **"Quantitative multi-analyte detection of volatile organic
-compounds using birefringent common-path interferometry"** (`../Manuscript/`).
+This repository contains the code for the manuscript **"Quantitative multi-analyte detection of volatile organic
+compounds using mid-infrared birefringent common-path interferometry"**. The manuscript is in `../Manuscript/`.
 
-A TWINS birefringent FTIR spectrometer measures isopropanol/ethanol mixtures in a 10 cm
-gas cell; two PIDs give reference concentrations. These notebooks turn the measured
-spectra into calibrated concentration predictions and produce every figure in the paper.
+The TWINS spectrometer is a birefringent FTIR spectrometer. It measures mixtures of isopropanol and ethanol in a
+10 cm gas cell. Two PIDs give the reference concentrations. The notebooks change the measured spectra into
+calibrated concentration predictions. The notebooks also make all the figures in the manuscript.
 
-## Setup
+## Installation
 
 ```bash
 python -m venv .venv
@@ -15,71 +15,116 @@ python -m venv .venv
 pip install -r requirements.txt
 ```
 
+In VS Code, run the notebooks with the `.venv` interpreter. This interpreter has the kernel name "TWINS Gas Sensing".
+The system Python cannot load the pickled models correctly, because it has an older version of scikit-learn.
+
 ## Run
 
 ```bash
-python notebook_runner.py       # runs all notebooks in order, in place
+python notebook_runner.py       # runs all notebooks in sequence and saves the outputs in the notebook files
 ```
 
-Notebooks pass data through `models/` and `results/`, so the order matters.
-`setup.py` is the **config file** — `configuration` there selects which datasets are used.
+The sequence of the notebooks is important, because some notebooks read data that other notebooks write to
+`models/` and `results/`.
 
-**Figure 5 and Table 1 compare two resolutions, so run the pipeline twice:** once with
-`configuration = "t1"`, once with `"t2"`. `05-02` then reads both results.
+`setup.py` is the **configuration file**. The variable `configuration` in this file selects the datasets that the
+notebooks use.
 
-## Notebooks → figures
+**Because Figure 5 and Table 2 compare two resolutions, run the pipeline two times:**
 
-The leading number is the figure. `00-` notebooks are preprocessing and map to no figure.
+1. Run the pipeline with `configuration = "t1"`.
+2. Run the pipeline with `configuration = "t2"`.
+
+Then, `05-02` reads the results of the two configurations.
+
+**Table S4** is about the ratio of synthetic training spectra. No file contains the data for this table. To get
+these data, do these steps for each of these values of `synthetic_sample_ratio`: 0, 0.05, 0.1, 0.2 and 0.5.
+
+1. Set `synthetic_sample_ratio` to the value.
+2. Run `00-02`, `00-03` and `04` again, in this sequence.
+
+## Notebooks and figures
+
+The number at the start of the notebook name is the figure number. The `00-` notebooks do the preprocessing. These
+notebooks have no figure.
 
 | Notebook | Figure | Content |
 |---|---|---|
-| `00-01-calibrate-sensors` | – | Calibrate the PID reference sensors against NIST spectra |
-| `00-02-train-model` | – | Train the ridge regression model |
-| `00-03-train-filter` | – | Configure the Kalman filter |
-| `00-04-test-model` | – | Check model + filter on the testing dataset |
-| `02-basic-characterization` | **2** | Interferograms, spectra, absorbance vs. NIST |
-| `03-testing-characterization` | **3** | Predicted vs. reference concentrations over 16 h |
-| `04-sensitivity-characterization` | **4** + **Table 1** | Sensitivity, selectivity, bias, LOD, drift |
-| `05-01-dynamic-characterization` | – | Response times and LOD → `results/` |
-| `05-02-dynamic-characterization` | **5** | Step response, LOD vs. response time (20 vs. 50 cm⁻¹) |
-| `s02-sensor-calibration` | **S2** | PID calibration, ethylene validation, saturation |
-| `s03-training-characterization` | **S3** | Training data, noise covariance, model weights |
+| `00-01-calibrate-sensors` | – | Uses NIST spectra to calibrate the PID reference sensors |
+| `00-02-train-model` | – | Trains the ridge regression model |
+| `00-03-train-filter` | – | Sets the parameters of the Kalman filter |
+| `00-04-test-model` | – | Checks the model and the filter with the testing dataset |
+| `02-basic-characterization` | **2** | Shows interferograms and spectra. Compares the absorbance with NIST spectra. |
+| `03-testing-characterization` | **3** | Compares the predicted concentrations with the reference concentrations for a period of 16 h |
+| `04-sensitivity-characterization` | **4** and **Table 2** | Shows sensitivity, selectivity, bias, LOD and drift |
+| `05-01-dynamic-characterization` | – | Calculates the response times and the LOD for different filter times. Writes them to `results/`. The response times in Table 2 come from this notebook. |
+| `05-02-dynamic-characterization` | **5** | Shows the step response and the LOD for different response times. Compares 20 cm⁻¹ with 50 cm⁻¹. |
+| `s02-sensor-calibration` | **S2** | Shows the PID calibration, the validation with ethylene and the saturation |
+| `s03-training-characterization` | **S3** | Shows the training data, the noise covariance and the model weights |
 
-Figures are saved to `../Figures/<notebook>-<configuration>.svg`.
-Figure 1 and S1 are drawings, not code.
-*The Word draft numbers SI figures continuously, so S2 → "Figure S7" and S3 → "Figure S8".*
+The notebooks save the figures to `../Figures/<notebook>-<configuration>.svg`. But `05-02` writes its figure to
+`05-dynamic-characterization-t1-t2.svg`.
+
+The panel letters, the titles and the labels in the plots are added by hand to the files `../Figures/<name>.svg`.
+Examples of these labels are "Analysis window" and "Fitting range". The names of these files have no suffix. The
+Word draft uses these files.
+
+These items do not come from the code:
+
+- Figure 1, which is a drawing
+- The photograph of the setup (`s01-setup`)
+- Table 1, which is a qualitative comparison
+- Table S3, which gives detection limits from the literature
+
+*In the Word draft, the SI items have continuous numbers. These are the names in the Word draft:*
+
+- *S1 is "Figure S6".*
+- *S2 is "Figure S7".*
+- *S3 is "Figure S8".*
+- *The SI tables are "Table S3" and "Table S4".*
 
 ## Pipeline
 
-1. **Calibrate reference** (`00-01`) — PIDs saturate, so fit a Beer–Lambert saturation
-   model with the absolute scale set by NIST coefficients and the 10 cm path length.
-   Also yields a **cutoff concentration** above which PID readings are discarded.
-2. **Train** (`00-02`) — Ridge regression maps absorbance (850–1450 cm⁻¹) to both
-   concentrations; λ by 5-fold CV. ~20% of samples are synthetic (NIST spectra + measured
-   correlated noise), and samples are reweighted to flatten the concentration distribution.
-3. **Filter** (`00-03`) — Kalman filter with constant gain, i.e. an exponential moving
-   average, set by the target rise time.
-4. **Evaluate** (`02`–`05`, `s02`–`s03`) — Apply to the held-out testing dataset.
+1. **Calibrate the reference** (`00-01`). Because the PIDs saturate, fit a Beer–Lambert saturation model. The NIST
+   coefficients and the path length of 10 cm set the absolute scale of this model. This step also gives a
+   **cutoff concentration**. PID readings above this concentration are discarded.
+2. **Train** (`00-02`). A ridge regression calculates the two concentrations from the absorbance.
+   - The spectral range of the absorbance is 850–1450 cm⁻¹.
+   - Each spectrum is mean-centred.
+   - A 5-fold cross-validation selects λ.
+   - Approximately 20% of the samples are synthetic. To make these samples, measured correlated noise is added to
+     NIST spectra.
+   - The samples get new weights to make the concentration distribution flat. These new weights give the synthetic
+     samples approximately 70% of the training weight.
+3. **Filter** (`00-03`). The filter is a Kalman filter with a constant gain. This filter is the same as an
+   exponential moving average. The target rise time sets the gain.
+4. **Evaluate** (`02`–`05`, `s02`–`s03`). Use the model and the filter on the held-out testing dataset.
 
-Only *settled* spectra are used, and samples above the PID cutoff are dropped — the
-"screened testing dataset" of the paper.
+The pipeline uses only *settled* spectra. It also removes the samples above the cutoff concentration. The result is
+the "screened testing dataset" of the manuscript.
 
-## Layout
+## Files and folders
 
-| Path | Role |
+| Path | Description |
 |---|---|
-| `setup.py` | Config: dataset selection, spectral range, hyperparameters. **Start here.** |
-| `processing.py` | Shared helpers: settling detection, spectral broadening, PID↔cell scaling |
-| `notebook_runner.py` | Runs all notebooks in order |
-| `datasets/` | Raw measurements (`.npz` + `.yaml`), acquired elsewhere, ~400 MB |
-| `NIST/`, `PID/` | Reference absorption spectra; ethylene PID calibration |
-| `models/`, `results/` | Written by the `00-` and `05-01` notebooks |
+| `setup.py` | Configuration file. It selects the datasets and sets the spectral range and the hyperparameters. **Start here.** |
+| `processing.py` | Helper functions that different notebooks use: settling detection, spectral broadening, and scaling between PID and cell |
+| `notebook_runner.py` | Runs all notebooks in the correct sequence |
+| `datasets/` | Measurements in `.npz` and `.yaml` files. They were recorded outside this repository. The size is approximately 400 MB. The notebooks use only 62F, 64F, 66F and 71F–76F. |
+| `NIST/` | Reference absorption spectra |
+| `PID/` | PID calibration with ethylene |
+| `models/` | The notebooks `00-01` to `00-03` write to this folder. |
+| `results/` | `05-01` writes to this folder. `05-02` reads from this folder. |
+
+The software `grasp-twins` calculated the spectra in `datasets/` before this pipeline. It used `TWINS.to_spectrum`
+with Happ–Genzel apodization. The "resolution" Δν is equal to 1/(2L). L is the one-sided maximum of the optical path
+difference. The FWHM of the line shape is approximately 1.8 Δν.
 
 ## Configurations
 
-| | Resolution | Acquired range | |
-|---|---|---|---|
-| **`t1`** | 20 cm⁻¹ | 550–2500 cm⁻¹ | **Main configuration of the paper** |
-| **`t2`** | 50 cm⁻¹ | 550–2500 cm⁻¹ | Low-resolution comparison (Fig. 5b, Table 1) |
-| `t3` | 20 cm⁻¹ | 700–1400 cm⁻¹ | Exploratory: narrowed range. Not in the manuscript |
-| `t4` | 20 cm⁻¹ | 700–1400 cm⁻¹ | Exploratory: bandlimited sampling. Not in the manuscript |
+| | Resolution | Measured range | Time for each spectrum | |
+|---|---|---|---|---|
+| **`t1`** | 20 cm⁻¹ | 550–2500 cm⁻¹ | 64 s | **Main configuration of the manuscript** |
+| **`t2`** | 50 cm⁻¹ | 550–2500 cm⁻¹ | 26 s | Configuration with low resolution. Figure 5b and Table 2 compare it with `t1`. |
+| `t3` | 20 cm⁻¹ | 700–1400 cm⁻¹ | 37–38 s | Configuration to examine a smaller range. The manuscript does not use it. |
+| `t4` | 20 cm⁻¹ | 700–1400 cm⁻¹ | 19–20 s | Configuration to examine bandlimited sampling. The manuscript does not use it. |
