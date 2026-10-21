@@ -37,7 +37,7 @@ notebooks use.
 
 Then, `05-02` reads the results of the two configurations.
 
-**Table S4** is about the ratio of synthetic training spectra. No file contains the data for this table. To get
+**Table S2** is about the ratio of synthetic training spectra. No file contains the data for this table. To get
 these data, do these steps for each of these values of `synthetic_sample_ratio`: 0, 0.05, 0.1, 0.2 and 0.5.
 
 1. Set `synthetic_sample_ratio` to the value.
@@ -74,14 +74,7 @@ These items do not come from the code:
 - Figure 1, which is a drawing
 - The photograph of the setup (`s01-setup`)
 - Table 1, which is a qualitative comparison
-- Table S3, which gives detection limits from the literature
-
-*In the Word draft, the SI items have continuous numbers. These are the names in the Word draft:*
-
-- *S1 is "Figure S6".*
-- *S2 is "Figure S7".*
-- *S3 is "Figure S8".*
-- *The SI tables are "Table S3" and "Table S4".*
+- Table S1, which gives detection limits from the literature
 
 ## Pipeline
 
@@ -94,11 +87,12 @@ These items do not come from the code:
    - A 5-fold cross-validation selects λ.
    - Approximately 20% of the samples are synthetic. To make these samples, measured correlated noise is added to
      NIST spectra.
-   - The samples get new weights to make the concentration distribution flat. These new weights give the synthetic
-     samples approximately 70% of the training weight.
+   - The samples get new weights to make the concentration distribution flat. In `t1`, these new weights give the
+     synthetic samples approximately 70% of the training weight.
 3. **Filter** (`00-03`). The filter is a Kalman filter with a constant gain. This filter is the same as an
    exponential moving average. The target rise time sets the gain.
-4. **Evaluate** (`02`–`05`, `s02`–`s03`). Use the model and the filter on the held-out testing dataset.
+4. **Evaluate** (`02`–`05`, `s02`–`s03`). Use the model and the filter on the held-out testing dataset. `s03` uses
+   them on the training dataset.
 
 The pipeline uses only *settled* spectra. It also removes the samples above the cutoff concentration. The result is
 the "screened testing dataset" of the manuscript.
